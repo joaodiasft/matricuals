@@ -384,12 +384,12 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
         // --- CONSTANTES E CONFIGURAÇÕES ---
         const MASTER_PASSWORD = '142536';
         const YOUR_WHATSAPP_NUMBER = '5562999998888';
         const PIX_KEY = 'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6';
-        const DB_NAME = 'CursoMatriculaDB_v7';
+        const DB_NAME = 'CursoMatriculaDB_v8';
         const DB_VERSION = 1;
         const STORES = ['students', 'trash', 'settings'];
         let db;
@@ -421,9 +421,9 @@
             { subject: 'matematica', code: 'M2', text: 'M2 (Sábado 07:30–09:00)', color: 'teal' },
         ];
         const plansData = [
-            { id: 'mensal', name: 'Mensal', price: { default: 250 } },
-            { id: 'bimestral', name: 'Bimestral', price: { default: 200 } },
-            { id: 'trimestral', name: 'Trimestral', price: { redacao: 200, gramatica: 200, fisica: 150, matematica: 150 } },
+            { id: 'mensal', name: 'Mensal', price: { default: 250 }, totalMonths: 1 },
+            { id: 'bimestral', name: 'Bimestral', price: { default: 200 }, totalMonths: 2 },
+            { id: 'trimestral', name: 'Trimestral', price: { redacao: 200, gramatica: 200, fisica: 150, matematica: 150 }, totalMonths: 3 },
         ];
         const professors = {
             fisica: 'Prof. Adriano',
@@ -449,6 +449,9 @@
             reader.onload = () => resolve(reader.result);
             reader.onerror = error => reject(error);
         });
+        const cleanPhoneNumber = (phone) => phone ? phone.replace(/\D/g, '') : '';
+        const cleanInstagram = (insta) => insta ? (insta.startsWith('@') ? insta.substring(1) : insta) : '';
+
 
         // --- LÓGICA DO BANCO DE DADOS (INDEXEDDB) ---
         function initDB() {
@@ -656,6 +659,9 @@
                 studentData.createdAt = new Date().toISOString();
                 studentData.status = 'enviada';
                 studentData.total = currentTotal;
+                studentData.monthsPaid = 0;
+                studentData.totalMonths = plansData.find(p => p.id === studentData.plan)?.totalMonths || 1;
+
 
                 try {
                     await dbTransaction(['students'], 'readwrite', (tx) => {
@@ -813,7 +819,6 @@
             const addSafeListener = (id, event, handler) => {
                 const el = document.getElementById(id);
                 if (el) el[event] = handler;
-                else console.error(`Element with id "${id}" not found.`);
             };
 
             addSafeListener('logout-btn', 'onclick', () => { adminView.classList.add('hidden'); studentView.classList.remove('hidden'); });
@@ -888,22 +893,22 @@
                         <svg class="w-5 h-5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     </button>
                     <div class="accordion-content">
-                        <div class="p-4 border-t border-default grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            ${studentsInTurma.map(student => renderStudentCard(student)).join('')}
+                        <div class="p-4 border-t border-default grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            ${studentsInTurma.map(student => renderStudentCard(student, turma)).join('')}
                         </div>
                     </div>
                 </div>`;
             }).join('');
         }
         
-        function renderStudentCard(student) {
+        function renderStudentCard(student, turma) {
             const statusColors = { 
                 enviada: { bg: 'bg-yellow-50', border: 'border-yellow-300', text: 'text-yellow-800', badge: 'bg-yellow-200' },
                 aprovada: { bg: 'bg-green-50', border: 'border-green-300', text: 'text-green-800', badge: 'bg-green-200' },
                 reprovada: { bg: 'bg-red-50', border: 'border-red-300', text: 'text-red-800', badge: 'bg-red-200' },
             };
             const color = statusColors[student.status] || { bg: 'bg-slate-50', border: 'border-slate-300', text: 'text-slate-800', badge: 'bg-slate-200' };
-
+            
             const actionsHtml = student.status === 'enviada' ? `
                 <div class="mt-4 flex gap-2">
                     <button data-id="${student.id}" class="approve-btn w-full text-sm font-semibold py-1.5 px-3 rounded-lg bg-green-500 text-white hover:bg-green-600">Aprovar</button>
@@ -912,14 +917,26 @@
             ` : '';
 
             return `
-            <div id="student-card-${student.id}" class="p-4 rounded-lg border ${color.bg} ${color.border}">
-                <div class="flex items-center gap-4">
-                    <img src="${student.photo || 'https://placehold.co/48x48/EFEFEF/333333?text=S/F'}" class="w-12 h-12 rounded-full object-cover">
-                    <div class="flex-grow">
-                        <p class="font-bold">${student.fullName}</p>
-                        <p class="text-sm text-muted-foreground">${student.plan}</p>
+            <div id="student-card-${student.id}-${turma.code}" class="p-4 rounded-lg border-2 ${color.border} ${color.bg} flex flex-col justify-between shadow-sm">
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-lg leading-tight">${student.fullName}</h3>
+                        <span class="text-xs font-bold px-2 py-1 rounded-full ${color.badge} ${color.text}">${student.status}</span>
                     </div>
-                    <span class="text-xs font-bold px-2 py-1 rounded-full ${color.badge} ${color.text}">${student.status}</span>
+                    <p class="text-sm text-muted-foreground"><strong class="font-semibold text-foreground">Turma:</strong> ${turma.code}</p>
+                </div>
+                <div class="my-4 space-y-3 text-sm border-t border-b border-default py-3">
+                     <div>
+                        <p class="text-xs font-semibold text-muted-foreground uppercase">Plano & Pagamento</p>
+                        <p>${student.plan} - ${student.monthsPaid || 0}/${student.totalMonths || 'N/A'} meses</p>
+                    </div>
+                     <div>
+                        <p class="text-xs font-semibold text-muted-foreground uppercase">Contato</p>
+                        <div class="flex items-center gap-3">
+                            <a href="https://wa.me/${cleanPhoneNumber(student.whatsapp)}" target="_blank" class="text-green-600 hover:underline">${student.whatsapp || 'WhatsApp'}</a>
+                            ${student.instagram ? `<a href="https://instagram.com/${cleanInstagram(student.instagram)}" target="_blank" class="text-pink-600 hover:underline">${student.instagram}</a>` : ''}
+                        </div>
+                    </div>
                 </div>
                 ${actionsHtml}
             </div>
@@ -934,6 +951,11 @@
                     const student = req.result;
                     if (student) {
                         student.status = newStatus;
+                        if(newStatus === 'aprovada') {
+                           student.monthsPaid = plansData.find(p => p.id === student.plan)?.totalMonths || 1;
+                        } else if (newStatus === 'reprovada') {
+                           student.monthsPaid = 0;
+                        }
                         store.put(student);
                     }
                 };
@@ -996,15 +1018,15 @@
         }
         
         async function handleBackup() {
-            // ... (código existente)
+            // ...
         }
 
         function handleRestore(event) {
-            // ... (código existente)
+            // ...
         }
         
         async function checkTrashAutoPurge() {
-            // ... (código existente)
+            // ...
         }
         
         async function seedDatabaseWithMockData() {
@@ -1016,22 +1038,22 @@
 
             if (count === 0) {
                  const mockStudents = [
-                    { id: 'RM-2025-1001', fullName: 'Ana Beatriz Cardoso', age: '17', dob: '2008-05-15', school: 'Colégio Exemplo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98877-6655', instagram: '@anabeatriz', motherName: 'Cláudia Cardoso', turmas: ['R1', 'F1'], plan: 'trimestral', createdAt: '2025-08-25T10:00:00.000Z', status: 'aprovada', total: 350 },
-                    { id: 'RM-2025-1002', fullName: 'Lucas Martins Silva', age: '16', dob: '2009-02-20', school: 'Escola Modelo', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 91122-3344', instagram: '@lucasms', motherName: 'Fernanda Martins', turmas: ['R2', 'M1'], plan: 'mensal', createdAt: '2025-08-31T11:30:00.000Z', status: 'enviada', total: 500 },
-                    { id: 'RM-2025-1003', fullName: 'Mariana Ferreira', age: '18', dob: '2007-09-10', school: 'Centro de Ensino', grade: 'Concluído', situacao: 'parou', whatsapp: '(62) 95566-7788', instagram: '@mari.ferreira', motherName: 'Sofia Ferreira', turmas: ['F1', 'G1'], plan: 'bimestral', createdAt: '2025-08-27T14:00:00.000Z', status: 'aprovada', total: 400 },
-                    { id: 'RM-2025-1004', fullName: 'Pedro Henrique Almeida', age: '17', dob: '2008-11-05', school: 'Colégio Objetivo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98899-0011', instagram: '@pedro.h.a', motherName: 'Juliana Almeida', turmas: ['M2', 'G1'], plan: 'trimestral', createdAt: '2025-08-28T09:15:00.000Z', status: 'enviada', total: 350 },
-                    { id: 'RM-2025-1005', fullName: 'Sofia Oliveira', age: '17', dob: '2008-01-25', school: 'Colégio Visão', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98123-4567', instagram: '@sofia.oliveira', motherName: 'Carla Oliveira', turmas: ['R3', 'M1'], plan: 'bimestral', createdAt: '2025-08-29T15:00:00.000Z', status: 'aprovada', total: 400 },
-                    { id: 'RM-2025-1006', fullName: 'Gabriel Costa', age: '16', dob: '2009-03-30', school: 'Externato São José', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 98234-5678', instagram: '@gabrielcosta', motherName: 'Sandra Costa', turmas: ['F1'], plan: 'mensal', createdAt: '2025-08-30T10:00:00.000Z', status: 'aprovada', total: 250 },
-                    { id: 'RM-2025-1007', fullName: 'Laura Pereira', age: '17', dob: '2008-07-12', school: 'Colégio Exemplo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98345-6789', instagram: '@laurapereira', motherName: 'Cristina Pereira', turmas: ['R4', 'M2'], plan: 'trimestral', createdAt: '2025-08-31T09:00:00.000Z', status: 'enviada', total: 350 },
-                    { id: 'RM-2025-1008', fullName: 'Arthur Rodrigues', age: '18', dob: '2007-04-01', school: 'Escola Modelo', grade: 'Concluído', situacao: 'parou', whatsapp: '(62) 98456-7890', instagram: '@arthur.rodrigues', motherName: 'Beatriz Rodrigues', turmas: ['R1'], plan: 'bimestral', createdAt: '2025-08-26T18:00:00.000Z', status: 'aprovada', total: 200 },
-                    { id: 'RM-2025-1009', fullName: 'Beatriz Almeida', age: '16', dob: '2009-08-19', school: 'Colégio Visão', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 98567-8901', instagram: '@biaalmeida', motherName: 'Patrícia Almeida', turmas: ['R5', 'G1'], plan: 'mensal', createdAt: '2025-08-28T13:20:00.000Z', status: 'aprovada', total: 500 },
-                    { id: 'RM-2025-1010', fullName: 'Davi Santos', age: '17', dob: '2008-06-06', school: 'Colégio Objetivo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98678-9012', instagram: '@davi_santos', motherName: 'Vanessa Santos', turmas: ['M1', 'R3'], plan: 'mensal', createdAt: '2025-08-30T16:45:00.000Z', status: 'enviada', total: 500 },
-                    { id: 'RM-2025-1011', fullName: 'Júlia Souza', age: '18', dob: '2007-02-14', school: 'Centro de Ensino', grade: 'Concluído', situacao: 'parou', whatsapp: '(62) 98789-0123', instagram: '@juliasouza', motherName: 'Márcia Souza', turmas: ['F1', 'R6'], plan: 'bimestral', createdAt: '2025-08-25T19:00:00.000Z', status: 'aprovada', total: 400 },
-                    { id: 'RM-2025-1012', fullName: 'Heitor Lima', age: '16', dob: '2009-10-03', school: 'Externato São José', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 98890-1234', instagram: '@heitorlima', motherName: 'Daniela Lima', turmas: ['M2', 'G1'], plan: 'trimestral', createdAt: '2025-08-29T08:00:00.000Z', status: 'reprovada', total: 350 },
-                    { id: 'RM-2025-1013', fullName: 'Isabella Gonçalves', age: '17', dob: '2008-12-01', school: 'Colégio Exemplo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98901-2345', instagram: '@isagoncalves', motherName: 'Simone Gonçalves', turmas: ['R1', 'M1'], plan: 'mensal', createdAt: '2025-08-31T14:10:00.000Z', status: 'enviada', total: 500 },
-                    { id: 'RM-2025-1014', fullName: 'Bernardo Ribeiro', age: '17', dob: '2008-09-09', school: 'Colégio Objetivo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 99012-3456', instagram: '@beribeiro', motherName: 'Aline Ribeiro', turmas: ['R2', 'F1'], plan: 'bimestral', createdAt: '2025-08-27T11:00:00.000Z', status: 'aprovada', total: 400 },
-                    { id: 'RM-2025-1015', fullName: 'Manuela Carvalho', age: '16', dob: '2009-05-22', school: 'Escola Modelo', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 99123-4567', instagram: '@manucarvalho', motherName: 'Tatiane Carvalho', turmas: ['R4'], plan: 'trimestral', createdAt: '2025-08-30T12:00:00.000Z', status: 'aprovada', total: 200 },
-                    { id: 'RM-2025-1016', fullName: 'Theo Fernandes', age: '17', dob: '2008-03-18', school: 'Colégio Visão', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 99234-5678', instagram: '@theof', motherName: 'Renata Fernandes', turmas: ['M2'], plan: 'mensal', createdAt: '2025-08-29T17:30:00.000Z', status: 'enviada', total: 250 }
+                    { id: 'RM-2025-1001', fullName: 'Ana Beatriz Cardoso', age: '17', dob: '2008-05-15', school: 'Colégio Exemplo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98877-6655', instagram: '@anabeatriz', motherName: 'Cláudia Cardoso', turmas: ['R1', 'F1'], plan: 'trimestral', createdAt: '2025-08-25T10:00:00.000Z', status: 'aprovada', total: 350, monthsPaid: 3, totalMonths: 3 },
+                    { id: 'RM-2025-1002', fullName: 'Lucas Martins Silva', age: '16', dob: '2009-02-20', school: 'Escola Modelo', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 91122-3344', instagram: '@lucasms', motherName: 'Fernanda Martins', turmas: ['R2', 'M1'], plan: 'mensal', createdAt: '2025-08-31T11:30:00.000Z', status: 'enviada', total: 500, monthsPaid: 0, totalMonths: 1 },
+                    { id: 'RM-2025-1003', fullName: 'Mariana Ferreira', age: '18', dob: '2007-09-10', school: 'Centro de Ensino', grade: 'Concluído', situacao: 'parou', whatsapp: '(62) 95566-7788', instagram: '@mari.ferreira', motherName: 'Sofia Ferreira', turmas: ['F1', 'G1'], plan: 'bimestral', createdAt: '2025-08-27T14:00:00.000Z', status: 'aprovada', total: 400, monthsPaid: 2, totalMonths: 2 },
+                    { id: 'RM-2025-1004', fullName: 'Pedro Henrique Almeida', age: '17', dob: '2008-11-05', school: 'Colégio Objetivo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98899-0011', instagram: '@pedro.h.a', motherName: 'Juliana Almeida', turmas: ['M2', 'G1'], plan: 'trimestral', createdAt: '2025-08-28T09:15:00.000Z', status: 'enviada', total: 350, monthsPaid: 0, totalMonths: 3 },
+                    { id: 'RM-2025-1005', fullName: 'Sofia Oliveira', age: '17', dob: '2008-01-25', school: 'Colégio Visão', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98123-4567', instagram: '@sofia.oliveira', motherName: 'Carla Oliveira', turmas: ['R3', 'M1'], plan: 'bimestral', createdAt: '2025-08-29T15:00:00.000Z', status: 'aprovada', total: 400, monthsPaid: 2, totalMonths: 2 },
+                    { id: 'RM-2025-1006', fullName: 'Gabriel Costa', age: '16', dob: '2009-03-30', school: 'Externato São José', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 98234-5678', instagram: '@gabrielcosta', motherName: 'Sandra Costa', turmas: ['F1'], plan: 'mensal', createdAt: '2025-08-30T10:00:00.000Z', status: 'aprovada', total: 250, monthsPaid: 1, totalMonths: 1 },
+                    { id: 'RM-2025-1007', fullName: 'Laura Pereira', age: '17', dob: '2008-07-12', school: 'Colégio Exemplo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98345-6789', instagram: '@laurapereira', motherName: 'Cristina Pereira', turmas: ['R4', 'M2'], plan: 'trimestral', createdAt: '2025-08-31T09:00:00.000Z', status: 'enviada', total: 350, monthsPaid: 0, totalMonths: 3 },
+                    { id: 'RM-2025-1008', fullName: 'Arthur Rodrigues', age: '18', dob: '2007-04-01', school: 'Escola Modelo', grade: 'Concluído', situacao: 'parou', whatsapp: '(62) 98456-7890', instagram: '@arthur.rodrigues', motherName: 'Beatriz Rodrigues', turmas: ['R1'], plan: 'bimestral', createdAt: '2025-08-26T18:00:00.000Z', status: 'aprovada', total: 200, monthsPaid: 2, totalMonths: 2 },
+                    { id: 'RM-2025-1009', fullName: 'Beatriz Almeida', age: '16', dob: '2009-08-19', school: 'Colégio Visão', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 98567-8901', instagram: '@biaalmeida', motherName: 'Patrícia Almeida', turmas: ['R5', 'G1'], plan: 'mensal', createdAt: '2025-08-28T13:20:00.000Z', status: 'aprovada', total: 500, monthsPaid: 1, totalMonths: 1 },
+                    { id: 'RM-2025-1010', fullName: 'Davi Santos', age: '17', dob: '2008-06-06', school: 'Colégio Objetivo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98678-9012', instagram: '@davi_santos', motherName: 'Vanessa Santos', turmas: ['M1', 'R3'], plan: 'mensal', createdAt: '2025-08-30T16:45:00.000Z', status: 'enviada', total: 500, monthsPaid: 0, totalMonths: 1 },
+                    { id: 'RM-2025-1011', fullName: 'Júlia Souza', age: '18', dob: '2007-02-14', school: 'Centro de Ensino', grade: 'Concluído', situacao: 'parou', whatsapp: '(62) 98789-0123', instagram: '@juliasouza', motherName: 'Márcia Souza', turmas: ['F1', 'R6'], plan: 'bimestral', createdAt: '2025-08-25T19:00:00.000Z', status: 'aprovada', total: 400, monthsPaid: 2, totalMonths: 2 },
+                    { id: 'RM-2025-1012', fullName: 'Heitor Lima', age: '16', dob: '2009-10-03', school: 'Externato São José', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 98890-1234', instagram: '@heitorlima', motherName: 'Daniela Lima', turmas: ['M2', 'G1'], plan: 'trimestral', createdAt: '2025-08-29T08:00:00.000Z', status: 'reprovada', total: 350, monthsPaid: 0, totalMonths: 3 },
+                    { id: 'RM-2025-1013', fullName: 'Isabella Gonçalves', age: '17', dob: '2008-12-01', school: 'Colégio Exemplo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98901-2345', instagram: '@isagoncalves', motherName: 'Simone Gonçalves', turmas: ['R1', 'M1'], plan: 'mensal', createdAt: '2025-08-31T14:10:00.000Z', status: 'enviada', total: 500, monthsPaid: 0, totalMonths: 1 },
+                    { id: 'RM-2025-1014', fullName: 'Bernardo Ribeiro', age: '17', dob: '2008-09-09', school: 'Colégio Objetivo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 99012-3456', instagram: '@beribeiro', motherName: 'Aline Ribeiro', turmas: ['R2', 'F1'], plan: 'bimestral', createdAt: '2025-08-27T11:00:00.000Z', status: 'aprovada', total: 400, monthsPaid: 2, totalMonths: 2 },
+                    { id: 'RM-2025-1015', fullName: 'Manuela Carvalho', age: '16', dob: '2009-05-22', school: 'Escola Modelo', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 99123-4567', instagram: '@manucarvalho', motherName: 'Tatiane Carvalho', turmas: ['R4'], plan: 'trimestral', createdAt: '2025-08-30T12:00:00.000Z', status: 'aprovada', total: 200, monthsPaid: 3, totalMonths: 3 },
+                    { id: 'RM-2025-1016', fullName: 'Theo Fernandes', age: '17', dob: '2008-03-18', school: 'Colégio Visão', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 99234-5678', instagram: '@theof', motherName: 'Renata Fernandes', turmas: ['M2'], plan: 'mensal', createdAt: '2025-08-29T17:30:00.000Z', status: 'enviada', total: 250, monthsPaid: 0, totalMonths: 1 }
                 ];
                 try {
                     await dbTransaction(['students'], 'readwrite', (tx) => {
@@ -1103,4 +1125,5 @@
     </script>
 </body>
 </html>
+
 
