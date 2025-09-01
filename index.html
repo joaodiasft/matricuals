@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Matrícula | Curso Redação Nota Mil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --background: #f8fafc; /* slate-50 */
+            --foreground: #0f172a; /* slate-900 */
+            --card: #ffffff;
+            --card-foreground: #0f172a;
+            --popover: #ffffff;
+            --popover-foreground: #0f172a;
+            --primary: #db2777; /* pink-600 */
+            --primary-foreground: #fdf2f8; /* pink-50 */
+            --secondary: #f1f5f9; /* slate-100 */
+            --secondary-foreground: #0f172a;
+            --muted: #f1f5f9; /* slate-100 */
+            --muted-foreground: #64748b; /* slate-500 */
+            --accent: #f4f4f5; /* zinc-100 */
+            --accent-foreground: #18181b; /* zinc-900 */
+            --destructive: #dc2626; /* red-600 */
+            --destructive-foreground: #fef2f2; /* red-50 */
+            --border: #e2e8f0; /* slate-200 */
+            --input: #e2e8f0;
+            --ring: #db2777;
+        }
+
+        [data-theme="dark"] {
+            --background: #020617; /* slate-950 */
+            --foreground: #f8fafc; /* slate-50 */
+            --card: #0f172a; /* slate-900 */
+            --card-foreground: #f8fafc;
+            --popover: #0f172a;
+            --popover-foreground: #f8fafc;
+            --primary: #f9a8d4; /* pink-300 */
+            --primary-foreground: #831843; /* pink-900 */
+            --secondary: #1e293b; /* slate-800 */
+            --secondary-foreground: #f8fafc;
+            --muted: #1e293b;
+            --muted-foreground: #94a3b8; /* slate-400 */
+            --accent: #334155; /* slate-700 */
+            --accent-foreground: #f8fafc;
+            --destructive: #ef4444; /* red-500 */
+            --destructive-foreground: #f8fafc;
+            --border: #1e293b;
+            --input: #1e293b;
+            --ring: #f9a8d4;
+        }
+
+        [data-theme="contrast"] {
+            --background: #ffffff;
+            --foreground: #000000;
+            --card: #ffffff;
+            --card-foreground: #000000;
+            --popover: #ffffff;
+            --popover-foreground: #000000;
+            --primary: #000000;
+            --primary-foreground: #ffffff;
+            --secondary: #eeeeee;
+            --secondary-foreground: #000000;
+            --muted: #eeeeee;
+            --muted-foreground: #555555;
+            --accent: #dddddd;
+            --accent-foreground: #000000;
+            --destructive: #ff0000;
+            --destructive-foreground: #ffffff;
+            --border: #000000;
+            --input: #000000;
+            --ring: #0000ff;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .card { background-color: var(--card); color: var(--card-foreground); }
+        .bg-muted { background-color: var(--muted); }
+        .text-muted-foreground { color: var(--muted-foreground); }
+        .border-default { border-color: var(--border); }
+        .btn-primary { background-color: var(--primary); color: var(--primary-foreground); }
+        .btn-primary:hover { opacity: 0.9; }
+
+        :focus-visible {
+            outline: 2px solid var(--ring);
+            outline-offset: 2px;
+            border-radius: 0.375rem;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #999; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        .popup { transition: opacity 0.5s, transform 0.5s; }
+        .pin-dot { transition: all 0.2s ease-in-out; }
+        .pin-dot.active { background-color: var(--primary); transform: scale(1.3); }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+        }
+        
+        @media (prefers-reduced-motion: no-preference) {
+            .accordion-content { transition: max-height 0.3s ease-in-out; }
+            .transform { transition-property: transform; }
+            .duration-300 { transition-duration: 300ms; }
+        }
+
+
+        @media print {
+            body * { visibility: hidden; }
+            .printable-area, .printable-area * { visibility: visible; }
+            .printable-area { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+
+<body class="text-slate-800">
+
+    <!-- Container Principal -->
+    <div id="app">
+
+        <!-- Visão do Aluno -->
+        <div id="student-view" class="container mx-auto p-4 md:p-8">
+            <header class="text-center mb-10 relative">
+                <h1 class="text-4xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 py-2">
+                    Curso Preparatório de Elite
+                </h1>
+                <p class="text-lg text-muted-foreground mt-2 max-w-3xl mx-auto">
+                   Conquiste a nota máxima na redação do ENEM e vestibulares!
+                </p>
+                <div id="theme-switcher-student" class="absolute top-0 right-0 no-print"></div>
+            </header>
+
+            <main>
+                <section class="mb-10">
+                    <div class="card p-8 rounded-2xl shadow-lg">
+                        <h2 class="text-3xl font-bold text-center">Nossas Disciplinas</h2>
+                        <p class="text-muted-foreground text-center mt-2 mb-8 max-w-3xl mx-auto">Oferecemos uma preparação completa e focada nas áreas de maior peso para a sua aprovação. Domine os conteúdos com nossos especialistas.</p>
+                        <div class="grid md:grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                            <div class="bg-indigo-50 border-l-4 border-indigo-500 p-5 rounded-r-lg shadow-sm transform hover:scale-105 duration-300">
+                                <h3 class="text-2xl font-bold text-indigo-800">Redação</h3>
+                                <p class="text-slate-700 mt-1">Estrutura dissertativa, repertório sociocultural e correções detalhadas para você alcançar a nota 1000.</p>
+                            </div>
+                             <div class="bg-teal-50 border-l-4 border-teal-500 p-5 rounded-r-lg shadow-sm transform hover:scale-105 duration-300">
+                                <h3 class="text-2xl font-bold text-teal-800">Matemática</h3>
+                                <p class="text-slate-700 mt-1">Do básico ao avançado, foque nos temas que mais caem e aprenda a resolver questões de forma rápida e eficiente.</p>
+                            </div>
+                             <div class="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-r-lg shadow-sm transform hover:scale-105 duration-300">
+                                <h3 class="text-2xl font-bold text-amber-800">Física</h3>
+                                <p class="text-slate-700 mt-1">Entenda os fenômenos, domine as fórmulas e resolva os problemas mais complexos de mecânica, elétrica e ondulatória.</p>
+                            </div>
+                             <div class="bg-purple-50 border-l-4 border-purple-500 p-5 rounded-r-lg shadow-sm relative overflow-hidden">
+                                <div class="absolute top-2 right-[-25px] bg-purple-600 text-white text-xs font-bold py-1 px-8 transform rotate-45">Em Breve</div>
+                                <h3 class="text-2xl font-bold text-purple-800">Química</h3>
+                                <p class="text-slate-700 mt-1">Reações, estequiometria e química orgânica. Desvende os segredos da matéria e garanta pontos cruciais.</p>
+                            </div>
+                             <div class="bg-green-50 border-l-4 border-green-500 p-5 rounded-r-lg shadow-sm relative overflow-hidden">
+                                <div class="absolute top-2 right-[-25px] bg-green-600 text-white text-xs font-bold py-1 px-8 transform rotate-45">Em Breve</div>
+                                <h3 class="text-2xl font-bold text-green-800">Biologia</h3>
+                                <p class="text-slate-700 mt-1">Ecologia, genética e fisiologia humana. Entenda a vida em todas as suas formas e gabarite as questões.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section>
+                    <div class="card max-w-4xl mx-auto p-8 rounded-2xl shadow-lg">
+                        <form id="registration-form" class="space-y-6">
+                            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md mb-5 text-center">
+                                <p class="font-bold">💡 Vagas Limitadas!</p>
+                                <p class="text-sm">Faça já sua matrícula e saia na frente rumo ao sucesso.</p>
+                            </div>
+    
+                            <fieldset class="border-2 border-default p-6 rounded-lg">
+                                <legend class="text-xl font-bold px-2 flex items-center gap-2">🧑‍🎓 PASSO 1 — Dados do Aluno <span class="text-sm font-medium text-red-600">(obrigatórios)</span></legend>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mt-4">
+                                    <div class="md:col-span-2"><label for="fullName" class="block text-sm font-medium text-muted-foreground">Nome completo</label><input type="text" id="fullName" name="fullName" required class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"></div>
+                                    <div><label for="age" class="block text-sm font-medium text-muted-foreground">Idade</label><input type="number" id="age" name="age" required class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"></div>
+                                    <div><label for="dob" class="block text-sm font-medium text-muted-foreground">Data de nascimento</label><input type="date" id="dob" name="dob" required class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"></div>
+                                    <div id="age-dob-error" class="md:col-span-2 -mt-2 text-red-500 text-sm hidden">Atenção: A idade informada não corresponde à data de nascimento.</div>
+                                    <div class="md:col-span-2"><label for="school" class="block text-sm font-medium text-muted-foreground">Onde estuda (escola)</label><input type="text" id="school" name="school" required class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"></div>
+                                    <div><label for="grade" class="block text-sm font-medium text-muted-foreground">Turma que frequenta</label><input type="text" id="grade" name="grade" required class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"></div>
+                                    <div class="flex items-center space-x-4 self-end pb-1"><span class="text-sm font-medium text-muted-foreground">Situação:</span><div class="flex items-center gap-2"><input type="radio" id="situacaoFrequenta" name="situacao" value="frequenta" checked><label for="situacaoFrequenta">Atualmente frequenta</label></div><div class="flex items-center gap-2"><input type="radio" id="situacaoParou" name="situacao" value="parou"><label for="situacaoParou">Parou</label></div></div>
+                                    <div id="quandoParouContainer" class="hidden md:col-span-2"><label for="quandoParou" class="block text-sm font-medium text-muted-foreground">Quando parou?</label><input type="text" id="quandoParou" name="quandoParou" placeholder="Ex: Há 6 meses, em 2023..." class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"></div>
+                                    <div><label for="whatsapp" class="block text-sm font-medium text-muted-foreground">WhatsApp</label><input type="tel" id="whatsapp" name="whatsapp" required class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring phone-mask" placeholder="(00) 00000-0000"></div>
+                                    <div class="flex items-center space-x-4 self-end pb-1"><span class="text-sm font-medium text-muted-foreground">Pode receber ligações?</span><div class="flex items-center gap-2"><input type="radio" id="ligaSim" name="ligacoes" value="sim" checked><label for="ligaSim">Sim</label></div><div class="flex items-center gap-2"><input type="radio" id="ligaNao" name="ligacoes" value="nao"><label for="ligaNao">Não</label></div></div>
+                                    <div id="telAlternativoContainer" class="hidden md:col-span-2"><label for="telAlternativo" class="block text-sm font-medium text-muted-foreground">Telefone alternativo</label><input type="tel" id="telAlternativo" name="telAlternativo" class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring phone-mask" placeholder="(00) 00000-0000"></div>
+                                    <div class="md:col-span-2"><label for="instagram" class="block text-sm font-medium text-muted-foreground">Instagram</label><input type="text" id="instagram" name="instagram" placeholder="@seuusuario" class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"></div>
+                                    <div><label for="fatherName" class="block text-sm font-medium text-muted-foreground">Nome do pai</label><input type="text" id="fatherName" name="fatherName" required class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"></div>
+                                    <div><label for="fatherPhone" class="block text-sm font-medium text-muted-foreground">Telefone do pai</label><input type="tel" id="fatherPhone" name="fatherPhone" required class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring phone-mask" placeholder="(00) 00000-0000"></div>
+                                    <div><label for="motherName" class="block text-sm font-medium text-muted-foreground">Nome da mãe</label><input type="text" id="motherName" name="motherName" required class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"></div>
+                                    <div><label for="motherPhone" class="block text-sm font-medium text-muted-foreground">Telefone da mãe</label><input type="tel" id="motherPhone" name="motherPhone" required class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring phone-mask" placeholder="(00) 00000-0000"></div>
+                                    
+                                    <div class="md:col-span-2 border-t border-default pt-4 mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                        <div><label for="cep" class="block text-sm font-medium text-muted-foreground">CEP (opcional)</label><input type="text" id="cep" name="cep" class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm"></div>
+                                        <div><label for="cidade" class="block text-sm font-medium text-muted-foreground">Cidade</label><input type="text" id="cidade" name="cidade" class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm"></div>
+                                        <div class="md:col-span-2"><label for="logradouro" class="block text-sm font-medium text-muted-foreground">Logradouro (Rua, Av.)</label><input type="text" id="logradouro" name="logradouro" class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm"></div>
+                                        <div><label for="bairro" class="block text-sm font-medium text-muted-foreground">Bairro</label><input type="text" id="bairro" name="bairro" class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm"></div>
+                                        <div><label for="numero" class="block text-sm font-medium text-muted-foreground">Número</label><input type="text" id="numero" name="numero" class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm"></div>
+                                        <div class="md:col-span-2"><label for="complemento" class="block text-sm font-medium text-muted-foreground">Complemento</label><input type="text" id="complemento" name="complemento" class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm"></div>
+                                    </div>
+
+                                    <div class="md:col-span-2"><label for="photo" class="block text-sm font-medium text-muted-foreground">Foto (sua escolha)</label><input type="file" id="photo" name="photo" accept="image/*" class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"></div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset class="border-2 border-default p-6 rounded-lg">
+                                <legend class="text-xl font-bold px-2 flex items-center gap-2">📚 PASSO 2 — Sobre o Curso <span class="text-sm font-medium text-red-600">(regras de seleção)</span></legend>
+                                <div class="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg mt-4 space-y-1">
+                                    <h4 class="font-bold">Regras de Seleção:</h4>
+                                    <ul class="list-disc list-inside">
+                                        <li>Pode selecionar até <strong>4 turmas</strong> no total.</li>
+                                        <li>Obrigatório ter pelo menos <strong>1 turma</strong> selecionada.</li>
+                                        <li><strong>Redação, Gramática, Matemática, Física:</strong> máximo 1 horário por matéria.</li>
+                                    </ul>
+                                </div>
+                                <div id="turmas-container" class="mt-6 space-y-8"></div>
+                                <div id="turma-error" class="mt-4 text-red-500 text-sm hidden"></div>
+                            </fieldset>
+
+                            <fieldset class="border-2 border-default p-6 rounded-lg">
+                                <legend class="text-xl font-bold px-2 flex items-center gap-2">🖊️ PASSO 3 — Termos & Assinatura</legend>
+                                <div class="mt-4 space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-muted-foreground">Política de Privacidade e Termos de Dados</label>
+                                        <div class="mt-1 p-3 h-48 overflow-y-auto bg-muted border border-input rounded-md text-sm text-muted-foreground">
+                                            <p class="font-semibold mb-2">Última atualização: 31 de agosto de 2025</p>
+                                            <p class="mb-2">Bem-vindo(a) à nossa plataforma de matrícula. Ao se inscrever, você concorda com os seguintes termos:</p>
+                                            <p class="mb-2"><strong class="font-semibold">1. Coleta de Dados:</strong> Coletamos informações pessoais e acadêmicas estritamente para fins de registro, comunicação e acompanhamento pedagógico no curso.</p>
+                                            <p class="mb-2"><strong class="font-semibold">2. Uso de Imagem e Vídeo:</strong> Ao participar do curso, você e seu responsável autorizam o uso de fotografias e gravações de vídeo para fins pedagógicos e de divulgação do nosso trabalho em mídias sociais, site e materiais promocionais.</p>
+                                            <p class="mb-2"><strong class="font-semibold">3. Comunicação:</strong> Utilizaremos seu WhatsApp para enviar informações importantes sobre o curso.</p>
+                                            <p class="mb-2"><strong class="font-semibold">4. Armazenamento e Segurança:</strong> Seus dados são armazenados localmente e protegidos.</p>
+                                            <p><strong class="font-semibold">5. Seus Direitos:</strong> Você pode solicitar acesso, correção ou exclusão dos seus dados a qualquer momento.</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <label class="flex items-start"><input type="checkbox" id="terms-agree" name="terms-agree" required class="h-4 w-4 mt-1 rounded border-input text-primary focus:ring-primary"><span class="ml-2 text-sm">Li e concordo com os Termos e a Política de Privacidade.</span></label>
+                                        <label class="flex items-start"><input type="checkbox" id="data-usage-agree" name="data-usage-agree" required class="h-4 w-4 mt-1 rounded border-input text-primary focus:ring-primary"><span class="ml-2 text-sm">Autorizo o uso pedagógico e de divulgação dos meus dados, incluindo fotos e vídeos.</span></label>
+                                    </div>
+                                    <div id="minor-warning-container" class="hidden mt-4 space-y-4">
+                                        <div class="bg-red-100 border-l-4 border-red-500 text-red-800 p-4 rounded-md"><p class="font-bold">Atenção: Aluno menor de 18 anos</p><p class="text-sm">Para que a matrícula tenha validade legal, é necessária a assinatura de um responsável.</p></div>
+                                        <div><label for="legalGuardianName" class="block text-sm font-medium text-muted-foreground">Nome do responsável legal</label><input type="text" id="legalGuardianName" name="legalGuardianName" class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"></div>
+                                    </div>
+                                    <div><label for="signature" class="block text-sm font-medium text-muted-foreground">Assinatura (digite seu nome completo)</label><input type="text" id="signature" name="signature" required placeholder="Digite seu nome completo aqui para assinar" class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"></div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset class="border-2 border-default p-6 rounded-lg">
+                                <legend class="text-xl font-bold px-2 flex items-center gap-2">✅ PASSO 4 — Revisão & Pagamento</legend>
+                                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div class="space-y-6">
+                                        <div><h4 class="text-lg font-semibold mb-3">1. Escolha seu Plano</h4><div id="plans-container" class="space-y-3"></div></div>
+                                        <div><h4 class="text-lg font-semibold mb-3">2. Resumo da Matrícula</h4><div id="summary-container" class="p-4 bg-muted rounded-lg border border-default"></div></div>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-semibold mb-3">3. Efetue o Pagamento</h4>
+                                        <div class="border-b border-default"><nav class="-mb-px flex space-x-6" aria-label="Tabs"><button type="button" id="pix-tab-button" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-pink-600 border-pink-500" role="tab" aria-selected="true">PIX</button><button type="button" id="card-tab-button" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-muted-foreground border-transparent hover:text-foreground hover:border-slate-300" role="tab" aria-selected="false">Cartão de Crédito</button></nav></div>
+                                        <div id="pix-payment-tab" role="tabpanel">
+                                            <div class="mt-4 space-y-4">
+                                                <p class="text-sm text-muted-foreground">Aponte a câmera do seu celular para o QR Code ou use a chave "Copia e Cola".</p>
+                                                <div class="flex flex-col items-center"><div id="qrcode-container" class="p-2 border rounded-lg bg-white"></div><input id="pix-key-display" type="text" readonly class="mt-3 w-full text-center text-sm bg-muted border rounded-md p-2 font-mono"><button type="button" id="copy-pix-key" class="mt-2 text-pink-600 hover:text-pink-800 text-sm font-semibold">Copiar Chave</button></div>
+                                                <div><label for="pix-id" class="block text-sm font-medium text-muted-foreground">Se já fez o PIX, informe o ID da transação (opcional)</label><input type="text" id="pix-id" name="pixId" class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm"></div>
+                                                <div class="flex items-center space-x-4"><label class="w-1/2 cursor-pointer text-center bg-secondary text-secondary-foreground font-bold py-2 px-4 rounded-lg hover:bg-accent"><span>Enviar Comprovante</span><input type="file" id="comprovante" name="comprovante" class="hidden"></label><a id="whatsapp-payment-link" href="#" target="_blank" class="w-1/2 text-center bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">Avisar no WhatsApp</a></div>
+                                            </div>
+                                        </div>
+                                        <div id="card-payment-tab" class="hidden" role="tabpanel">
+                                            <div class="mt-4 space-y-4">
+                                                <p class="text-sm text-muted-foreground">Simulação de pagamento com cartão. Nenhuma cobrança real será feita.</p>
+                                                <div><label for="installments" class="block text-sm font-medium text-muted-foreground">Número de Parcelas</label><select id="installments" name="installments" class="mt-1 block w-full py-2 px-3 border border-input card rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"></select></div>
+                                                <div id="installment-details" class="p-3 bg-muted rounded-md text-center font-semibold"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <button type="submit" class="w-full btn-primary font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring transition-transform transform hover:scale-105">Confirmar Matrícula</button>
+                        </form>
+                    </div>
+                </section>
+            </main>
+            <footer class="text-center mt-8 container mx-auto p-4 md:p-8">
+                <p class="text-muted-foreground">© 2024 Curso Redação Nota Mil. Todos os direitos reservados.</p>
+                <a href="#" id="admin-login-link" class="text-pink-600 hover:underline mt-2 inline-block">Acesso do Administrador</a>
+            </footer>
+        </div>
+
+        <!-- Visão de Confirmação -->
+        <div id="confirmation-view" class="hidden max-w-2xl mx-auto card p-8 md:p-12 rounded-2xl shadow-lg text-center printable-area">
+            <h2 class="text-3xl font-bold text-green-600">Matrícula Confirmada!</h2>
+            <p class="mt-2 text-muted-foreground">Seja bem-vindo(a)! Sua pré-matrícula foi realizada com sucesso.</p>
+            <div class="mt-6 bg-indigo-50 p-6 rounded-lg border-2 border-dashed border-indigo-200">
+                <p class="text-sm text-indigo-800 font-semibold">Seu código de matrícula é:</p>
+                <div class="flex items-center justify-center gap-4 mt-2"><p id="confirmation-code" class="text-2xl md:text-3xl font-bold text-indigo-900 font-mono tracking-wider"></p><button id="copy-confirmation-code" class="p-2 rounded-md hover:bg-indigo-100 no-print" aria-label="Copiar código"><svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 '0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></button></div>
+            </div>
+            <div class="mt-6 text-sm text-muted-foreground"><p>Guarde este código. Ele será sua identificação no curso.</p><p class="mt-1">Aguarde nosso contato via WhatsApp para os próximos passos.</p></div>
+            <div id="confirmation-controls" class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 no-print"><a id="whatsapp-confirmation-link" href="#" target="_blank" class="w-full sm:w-auto text-center bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600">Enviar via WhatsApp</a><button id="print-confirmation" class="w-full sm:w-auto bg-secondary text-secondary-foreground font-bold py-3 px-6 rounded-lg hover:bg-accent">Imprimir / Salvar PDF</button></div>
+            <div id="confirmation-summary-print" class="hidden text-left mt-8"></div>
+        </div>
+        
+        <!-- Visão de Login do Admin -->
+        <div id="admin-login-view" class="hidden fixed inset-0 bg-slate-900 bg-opacity-75 flex items-center justify-center z-50">
+            <div class="card rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
+                <h2 id="pin-title" class="text-2xl font-bold">Acesso Administrativo</h2>
+                <p id="pin-subtitle" class="text-muted-foreground mt-2 text-sm">Digite seu PIN de 6 dígitos.</p>
+                <div id="pin-input" class="flex justify-center gap-3 my-6">
+                    <div class="w-5 h-5 bg-secondary rounded-full pin-dot"></div><div class="w-5 h-5 bg-secondary rounded-full pin-dot"></div><div class="w-5 h-5 bg-secondary rounded-full pin-dot"></div><div class="w-5 h-5 bg-secondary rounded-full pin-dot"></div><div class="w-5 h-5 bg-secondary rounded-full pin-dot"></div><div class="w-5 h-5 bg-secondary rounded-full pin-dot"></div>
+                </div>
+                 <p id="pin-error" class="text-red-500 text-sm h-5 mb-2"></p>
+                <div id="pin-keypad" class="grid grid-cols-3 gap-3">
+                    <button class="py-4 bg-secondary rounded-lg text-xl font-bold hover:bg-accent">1</button><button class="py-4 bg-secondary rounded-lg text-xl font-bold hover:bg-accent">2</button><button class="py-4 bg-secondary rounded-lg text-xl font-bold hover:bg-accent">3</button>
+                    <button class="py-4 bg-secondary rounded-lg text-xl font-bold hover:bg-accent">4</button><button class="py-4 bg-secondary rounded-lg text-xl font-bold hover:bg-accent">5</button><button class="py-4 bg-secondary rounded-lg text-xl font-bold hover:bg-accent">6</button>
+                    <button class="py-4 bg-secondary rounded-lg text-xl font-bold hover:bg-accent">7</button><button class="py-4 bg-secondary rounded-lg text-xl font-bold hover:bg-accent">8</button><button class="py-4 bg-secondary rounded-lg text-xl font-bold hover:bg-accent">9</button>
+                    <button id="cancel-pin" class="py-4 text-sm font-semibold">Cancelar</button><button class="py-4 bg-secondary rounded-lg text-xl font-bold hover:bg-accent">0</button><button id="delete-pin" class="py-4 flex items-center justify-center" aria-label="Apagar dígito"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 002.828 0L21 12M3 12l6.414-6.414a2 2 0 012.828 0L21 12"></path></svg></button>
+                </div>
+                 <div id="master-password-container" class="hidden"><label for="master-password" class="block text-sm font-medium text-muted-foreground">Senha Mestra</label><input type="password" id="master-password" class="mt-1 block w-full px-3 py-2 card border border-input rounded-md shadow-sm"><button id="master-password-submit" class="mt-4 w-full btn-primary font-bold py-2 px-4 rounded-lg">Confirmar</button></div>
+            </div>
+        </div>
+
+        <!-- Visão do Administrador -->
+        <div id="admin-view" class="hidden min-h-screen">
+            <div class="p-4 sm:p-6 lg:p-8">
+                <header class="mb-8 flex flex-wrap justify-between items-center gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold">Painel de Matrículas</h1>
+                        <p class="text-muted-foreground">Gerencie todos os seus alunos em um só lugar.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div id="theme-switcher-admin"></div>
+                        <button id="backup-btn" class="p-2 rounded-lg card shadow-sm hover:bg-accent" title="Fazer Backup"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg></button>
+                        <button id="trash-btn" class="p-2 rounded-lg card shadow-sm hover:bg-accent" title="Lixeira"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                        <button id="logout-btn" class="p-2 rounded-lg card shadow-sm hover:bg-accent" title="Sair"><svg class="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
+                    </div>
+                </header>
+
+                <div id="stats-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6"></div>
+                
+                <div class="card p-4 rounded-xl shadow-sm mb-6 no-print">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <input type="text" id="search-filter" placeholder="Pesquisar por nome..." class="p-2 border border-input rounded-lg bg-secondary">
+                        <select id="status-filter" class="p-2 border border-input rounded-lg bg-secondary"><option value="">Todos Status</option><option value="enviada">Enviada</option><option value="aprovada">Aprovada</option><option value="reprovada">Reprovada</option></select>
+                        <input type="date" id="date-filter-start" class="p-2 border border-input rounded-lg bg-secondary" title="Data de início">
+                        <input type="date" id="date-filter-end" class="p-2 border border-input rounded-lg bg-secondary" title="Data de fim">
+                    </div>
+                </div>
+
+                <div id="class-groups-container" class="space-y-4">
+                    <!-- Grupos de turmas serão renderizados aqui -->
+                </div>
+            </div>
+            
+            <!-- Modal da Lixeira -->
+            <div id="trash-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-75 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="trash-modal-title">
+                 <div class="card rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 id="trash-modal-title" class="text-2xl font-bold">Lixeira</h2>
+                        <button id="close-trash-modal" class="p-2 hover:bg-accent rounded-full" aria-label="Fechar modal">&times;</button>
+                    </div>
+                    <div id="trash-actions" class="mb-4"><button id="empty-trash-btn" class="bg-destructive text-destructive-foreground font-semibold py-2 px-4 rounded-lg hover:opacity-90">Esvaziar Lixeira</button></div>
+                    <div class="h-96 overflow-y-auto">
+                        <table class="min-w-full divide-y border-default">
+                            <thead class="bg-secondary"><tr><th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Nome</th><th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Excluído em</th><th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Ações</th></tr></thead>
+                            <tbody id="trash-table-body" class="divide-y border-default"></tbody>
+                        </table>
+                    </div>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup de Sucesso/Erro -->
+    <div id="popup" class="fixed top-5 right-5 text-white py-3 px-6 rounded-lg shadow-xl opacity-0 transform translate-y-[-20px] popup z-[100]" role="alert">
+        <span id="popup-message"></span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        // --- CONSTANTES E CONFIGURAÇÕES ---
+        const MASTER_PASSWORD = '142536';
+        const YOUR_WHATSAPP_NUMBER = '5562999998888';
+        const PIX_KEY = 'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6';
+        const DB_NAME = 'CursoMatriculaDB_v7';
+        const DB_VERSION = 1;
+        const STORES = ['students', 'trash', 'settings'];
+        let db;
+
+        // --- SELETORES DE ELEMENTOS ---
+        const app = document.getElementById('app');
+        const studentView = document.getElementById('student-view');
+        const adminLoginView = document.getElementById('admin-login-view');
+        const adminView = document.getElementById('admin-view');
+        const registrationForm = document.getElementById('registration-form');
+        const adminLoginLink = document.getElementById('admin-login-link');
+        const confirmationView = document.getElementById('confirmation-view');
+        const turmasContainer = document.getElementById('turmas-container');
+        const plansContainer = document.getElementById('plans-container');
+        const summaryContainer = document.getElementById('summary-container');
+        const trashModal = document.getElementById('trash-modal');
+
+        // --- MODELOS DE DADOS ---
+        const turmasData = [
+            { subject: 'fisica', code: 'F1', text: 'F1 (Segunda 19:00–20:30)', color: 'amber' },
+            { subject: 'redacao', code: 'R1', text: 'R1 (Quarta 17:30–19:00)', color: 'indigo' },
+            { subject: 'redacao', code: 'R2', text: 'R2 (Quarta 19:00–20:30)', color: 'indigo' },
+            { subject: 'redacao', code: 'R3', text: 'R3 (Sáb 09:30–11:00)', color: 'indigo' },
+            { subject: 'redacao', code: 'R4', text: 'R4 (Sáb 11:00–12:30)', color: 'indigo' },
+            { subject: 'redacao', code: 'R5', text: 'R5 (Sáb 14:30–15:30)', color: 'indigo' },
+            { subject: 'redacao', code: 'R6', text: 'R6 (Sáb 15:30–17:00)', color: 'indigo' },
+            { subject: 'gramatica', code: 'G1', text: 'G1 (Sexta 19:00–20:30)', color: 'pink' },
+            { subject: 'matematica', code: 'M1', text: 'M1 (Quinta 18:40–19:40)', color: 'teal' },
+            { subject: 'matematica', code: 'M2', text: 'M2 (Sábado 07:30–09:00)', color: 'teal' },
+        ];
+        const plansData = [
+            { id: 'mensal', name: 'Mensal', price: { default: 250 } },
+            { id: 'bimestral', name: 'Bimestral', price: { default: 200 } },
+            { id: 'trimestral', name: 'Trimestral', price: { redacao: 200, gramatica: 200, fisica: 150, matematica: 150 } },
+        ];
+        const professors = {
+            fisica: 'Prof. Adriano',
+            redacao: 'Profª Martinha',
+            gramatica: 'Profª Martinha',
+            matematica: 'Prof. Michael'
+        };
+
+        // --- FUNÇÕES UTILITÁRIAS ---
+        const formatCurrency = (value) => value != null ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00';
+        const showPopup = (message, isError = false) => {
+            const popup = document.getElementById('popup');
+            const popupMessage = document.getElementById('popup-message');
+            popupMessage.textContent = message;
+            popup.className = `fixed top-5 right-5 text-white py-3 px-6 rounded-lg shadow-xl popup z-[100] ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+            popup.classList.remove('opacity-0', 'translate-y-[-20px]');
+            setTimeout(() => popup.classList.add('opacity-0', 'translate-y-[-20px]'), 4000);
+        };
+        const toBase64 = file => new Promise((resolve, reject) => {
+            if (!file || file.size === 0) return resolve(null);
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        // --- LÓGICA DO BANCO DE DADOS (INDEXEDDB) ---
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = (e) => reject("Erro ao abrir o DB: " + e.target.errorCode);
+                request.onsuccess = (e) => { db = e.target.result; resolve(db); };
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    STORES.forEach(storeName => {
+                        if (!db.objectStoreNames.contains(storeName)) {
+                            if (storeName === 'settings') {
+                                db.createObjectStore(storeName, { keyPath: 'key' });
+                            } else {
+                                db.createObjectStore(storeName, { keyPath: 'id' });
+                            }
+                        }
+                    });
+                };
+            });
+        }
+
+        function dbTransaction(storeNames, mode, callback) {
+            return new Promise((resolve, reject) => {
+                if (!db) { reject("DB não inicializado."); return; }
+                const transaction = db.transaction(storeNames, mode);
+                const results = {};
+                transaction.oncomplete = () => resolve(results.final);
+                transaction.onerror = (e) => { console.error(`Erro na transação ${mode} em ${storeNames}:`, e.target.error); reject(e.target.error); };
+                callback(transaction, results);
+            });
+        }
+        
+        function dbGetAll(storeName) {
+            return new Promise((resolve, reject) => {
+                dbTransaction([storeName], 'readonly', (tx, res) => {
+                    const req = tx.objectStore(storeName).getAll();
+                    req.onsuccess = () => res.final = req.result;
+                }).then(resolve).catch(reject);
+            });
+        }
+        
+        // --- FUNÇÕES DE CRIPTOGRAFIA (PIN) ---
+        async function hashData(data) {
+            const msgUint8 = new TextEncoder().encode(data);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // --- LÓGICA DO FORMULÁRIO DO ALUNO ---
+        function initializeStudentForm() {
+            if (!registrationForm) return;
+
+            let currentTotal = 0;
+            let qrCodeInstance = null;
+
+            const updateSummaryAndPayment = () => {
+                const selectedPlanId = document.querySelector('input[name="plan"]:checked')?.value;
+                const selectedTurmasCheckboxes = document.querySelectorAll('input[name="turmas"]:checked');
+                
+                if (!selectedPlanId || selectedTurmasCheckboxes.length === 0) {
+                    summaryContainer.innerHTML = `<p class="text-sm text-muted-foreground">Selecione um plano e pelo menos uma turma.</p>`;
+                    currentTotal = 0;
+                    updateInstallments(0);
+                    updateQRCode(0);
+                    return;
+                }
+
+                const selectedPlan = plansData.find(p => p.id === selectedPlanId);
+                let total = 0;
+                const summaryDetails = [];
+
+                const selectedSubjects = Array.from(selectedTurmasCheckboxes).map(cb => turmasData.find(t => t.code === cb.value).subject);
+
+                selectedSubjects.forEach(subject => {
+                    let price = selectedPlan.price.default ?? selectedPlan.price[subject] ?? 0;
+                    total += price;
+                    summaryDetails.push(`<li>${subject.charAt(0).toUpperCase() + subject.slice(1)}: ${formatCurrency(price)}</li>`);
+                });
+                
+                currentTotal = total;
+
+                summaryContainer.innerHTML = `
+                    <ul class="text-sm space-y-1">${summaryDetails.join('')}</ul>
+                    <div class="border-t mt-2 pt-2 text-right">
+                        <p class="font-bold text-lg">Total: ${formatCurrency(total)}</p>
+                    </div>`;
+                
+                updateInstallments(total);
+                updateQRCode(total);
+            };
+            
+            const updateInstallments = (total) => {
+                const installmentsSelect = document.getElementById('installments');
+                const detailsDiv = document.getElementById('installment-details');
+                if (!installmentsSelect || !detailsDiv) return;
+                installmentsSelect.innerHTML = '';
+                for (let i = 1; i <= 10; i++) {
+                    const value = (total / i).toFixed(2);
+                    installmentsSelect.innerHTML += `<option value="${i}">${i}x de ${formatCurrency(parseFloat(value))}</option>`;
+                }
+                detailsDiv.textContent = installmentsSelect.options[0]?.text || '';
+                installmentsSelect.onchange = () => {
+                    detailsDiv.textContent = installmentsSelect.options[installmentsSelect.selectedIndex].text;
+                };
+            };
+
+            const updateQRCode = (total) => {
+                const container = document.getElementById('qrcode-container');
+                const keyDisplay = document.getElementById('pix-key-display');
+                if (!container || !keyDisplay) return;
+                container.innerHTML = '';
+                keyDisplay.value = PIX_KEY;
+                
+                const pixPayload = `00020126580014br.gov.bcb.pix0136${PIX_KEY}52040000530398654${total > 0 ? total.toFixed(2) : '0.00'}5802BR5913NOME_DO_CURSO6009SAO_PAULO62070503***6304ABCD`;
+                
+                if (qrCodeInstance) {
+                    qrCodeInstance.makeCode(pixPayload);
+                } else {
+                    qrCodeInstance = new QRCode(container, {
+                        text: pixPayload,
+                        width: 160,
+                        height: 160,
+                    });
+                }
+            };
+
+            turmasContainer.innerHTML = Object.entries(professors).map(([subject, prof]) => {
+                const subjectTurmas = turmasData.filter(t => t.subject === subject);
+                return `
+                    <div>
+                        <h4 class="text-lg font-semibold">${subject.charAt(0).toUpperCase() + subject.slice(1)} <span class="text-sm font-normal text-muted-foreground">- ${prof}</span></h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-2">
+                            ${subjectTurmas.map(turma => `
+                                <label class="p-3 border-2 border-default rounded-lg cursor-pointer hover:border-pink-500 transition-colors has-[:checked]:border-primary has-[:checked]:ring-2 has-[:checked]:ring-pink-300">
+                                    <input type="checkbox" name="turmas" value="${turma.code}" data-subject="${turma.subject}" class="hidden">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-bold">${turma.code}</span>
+                                        <svg class="h-6 w-6 text-primary hidden check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                                    </div>
+                                    <p class="text-sm text-muted-foreground mt-1">${turma.text}</p>
+                                </label>`).join('')}
+                        </div>
+                    </div>`;
+            }).join('');
+
+            plansContainer.innerHTML = plansData.map((plan, index) => `
+                <label class="block p-3 border-2 border-default rounded-lg cursor-pointer has-[:checked]:border-primary has-[:checked]:ring-2 has-[:checked]:ring-pink-300">
+                    <input type="radio" name="plan" value="${plan.id}" ${index === 0 ? 'checked' : ''} class="hidden">
+                    <span class="font-bold">${plan.name}</span>
+                </label>`).join('');
+
+            app.addEventListener('change', (e) => {
+                if (e.target.name === 'plan' || e.target.name === 'turmas') {
+                    document.querySelectorAll('input[name="turmas"]').forEach(el => {
+                        el.closest('label').querySelector('.check-icon').classList.toggle('hidden', !el.checked);
+                    });
+                    updateSummaryAndPayment();
+                }
+                if (e.target.name === 'turmas') {
+                    const subject = e.target.dataset.subject;
+                    const isChecked = e.target.checked;
+                    document.querySelectorAll(`input[name="turmas"][data-subject="${subject}"]`).forEach(el => {
+                        el.closest('label').classList.toggle('opacity-50', isChecked && el !== e.target);
+                        el.disabled = isChecked && el !== e.target;
+                    });
+                }
+            });
+            
+            const pixTabBtn = document.getElementById('pix-tab-button');
+            const cardTabBtn = document.getElementById('card-tab-button');
+            const pixTab = document.getElementById('pix-payment-tab');
+            const cardTab = document.getElementById('card-payment-tab');
+            pixTabBtn.addEventListener('click', () => {
+                pixTab.classList.remove('hidden'); cardTab.classList.add('hidden');
+                pixTabBtn.classList.add('text-pink-600', 'border-pink-500'); cardTabBtn.classList.remove('text-pink-600', 'border-pink-500');
+            });
+            cardTabBtn.addEventListener('click', () => {
+                cardTab.classList.remove('hidden'); pixTab.classList.add('hidden');
+                cardTabBtn.classList.add('text-pink-600', 'border-pink-500'); pixTabBtn.classList.remove('text-pink-600', 'border-pink-500');
+            });
+            
+            document.getElementById('copy-pix-key').addEventListener('click', () => {
+                navigator.clipboard.writeText(PIX_KEY).then(() => showPopup('Chave PIX copiada!'));
+            });
+
+            registrationForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(registrationForm);
+                const studentData = {};
+                for (let [key, value] of formData.entries()) {
+                     if (key !== 'photo' && key !== 'comprovante') {
+                         studentData[key] = value;
+                     }
+                }
+                studentData.turmas = formData.getAll('turmas');
+                if (studentData.turmas.length === 0) {
+                    showPopup('Selecione ao menos uma turma.', true);
+                    return;
+                }
+                studentData.photo = await toBase64(formData.get('photo'));
+                studentData.comprovante = await toBase64(formData.get('comprovante'));
+                studentData.id = `RM-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
+                studentData.createdAt = new Date().toISOString();
+                studentData.status = 'enviada';
+                studentData.total = currentTotal;
+
+                try {
+                    await dbTransaction(['students'], 'readwrite', (tx) => {
+                        tx.objectStore('students').add(studentData);
+                    });
+                    showPopup('Matrícula enviada com sucesso!');
+                    showConfirmationPage(studentData);
+                    registrationForm.reset();
+                    updateSummaryAndPayment();
+                } catch (error) {
+                    showPopup('Erro ao salvar matrícula. Tente novamente.', true);
+                }
+            });
+
+            updateSummaryAndPayment();
+        }
+        
+        function showConfirmationPage(studentData) {
+            studentView.classList.add('hidden');
+            confirmationView.classList.remove('hidden');
+            window.scrollTo(0, 0);
+
+            document.getElementById('confirmation-code').textContent = studentData.id;
+            document.getElementById('copy-confirmation-code').onclick = () => {
+                navigator.clipboard.writeText(studentData.id).then(() => showPopup('Código copiado!'));
+            };
+
+            const summaryText = `Matrícula para ${studentData.fullName} confirmada! Código: ${studentData.id}. Plano: ${studentData.plan}. Turmas: ${studentData.turmas.join(', ')}. Total: ${formatCurrency(studentData.total)}.`;
+            document.getElementById('whatsapp-confirmation-link').href = `https://wa.me/${YOUR_WHATSAPP_NUMBER}?text=${encodeURIComponent(summaryText)}`;
+
+            const summaryHtml = `
+                <h3 class="text-xl font-bold mb-2">Resumo da Matrícula</h3>
+                <p><strong>Código:</strong> ${studentData.id}</p>
+                <p><strong>Nome:</strong> ${studentData.fullName}</p>
+                <p><strong>Plano:</strong> ${studentData.plan}</p>
+                <p><strong>Turmas:</strong> ${studentData.turmas.join(', ')}</p>
+                <p><strong>Total:</strong> ${formatCurrency(studentData.total)}</p>`;
+            document.getElementById('confirmation-summary-print').innerHTML = summaryHtml;
+            document.getElementById('print-confirmation').onclick = () => window.print();
+        }
+
+
+        // --- LÓGICA DO PAINEL DE ADMIN ---
+        async function initializeAdminLogin() {
+            let pinEntry = '';
+            let pinState = 'check'; // states: 'check', 'master_pass', 'create', 'confirm'
+            let newPin = '';
+            
+            const pinDots = document.querySelectorAll('#pin-input .pin-dot');
+            const pinKeypad = document.getElementById('pin-keypad');
+            const pinTitle = document.getElementById('pin-title');
+            const pinSubtitle = document.getElementById('pin-subtitle');
+            const pinError = document.getElementById('pin-error');
+            const masterPassContainer = document.getElementById('master-password-container');
+
+            const resetPinInput = () => { pinEntry = ''; updatePinUI(); pinError.textContent = ''; };
+            const updatePinUI = () => pinDots.forEach((dot, i) => dot.classList.toggle('active', i < pinEntry.length));
+
+            const setPinState = (newState, title, subtitle, showKeypad = true) => {
+                pinState = newState;
+                pinTitle.textContent = title;
+                pinSubtitle.textContent = subtitle;
+                pinKeypad.classList.toggle('hidden', !showKeypad);
+                masterPassContainer.classList.toggle('hidden', showKeypad);
+                resetPinInput();
+            };
+            
+            window.triggerPinChange = () => {
+                adminLoginView.classList.remove('hidden');
+                setPinState('create', 'Alterar PIN', 'Digite um novo PIN de 6 dígitos.');
+            };
+
+            const handlePinEntry = async () => {
+                if (pinEntry.length !== 6) return;
+
+                let storedPinHash;
+                try {
+                    await dbTransaction(['settings'], 'readonly', (tx, res) => {
+                        const req = tx.objectStore('settings').get('pinHash');
+                        req.onsuccess = () => res.final = req.result;
+                    }).then(result => storedPinHash = result?.value);
+                } catch (e) { console.error("Could not read pinHash from settings", e); }
+                
+                const inputHash = await hashData(pinEntry);
+
+                switch (pinState) {
+                    case 'check':
+                        if (storedPinHash && inputHash === storedPinHash) {
+                            adminLoginView.classList.add('hidden');
+                            adminView.classList.remove('hidden');
+                            resetPinInput();
+                            await renderAdminDashboard();
+                        } else if (storedPinHash) {
+                            pinError.textContent = 'PIN incorreto.';
+                            setTimeout(resetPinInput, 1000);
+                        } else {
+                            setPinState('master_pass', 'Primeiro Acesso', 'Use a senha mestra para criar seu PIN.', false);
+                        }
+                        break;
+                    case 'create':
+                        newPin = pinEntry;
+                        setPinState('confirm', 'Confirme seu PIN', 'Digite o novo PIN novamente.');
+                        break;
+                    case 'confirm':
+                        if (pinEntry === newPin) {
+                            const newPinHash = await hashData(newPin);
+                            await dbTransaction(['settings'], 'readwrite', (tx) => {
+                                tx.objectStore('settings').put({ key: 'pinHash', value: newPinHash });
+                            });
+                            showPopup('PIN salvo com sucesso!');
+                            adminLoginView.classList.add('hidden'); adminView.classList.remove('hidden');
+                            setPinState('check', 'Acesso Administrativo', 'Digite seu PIN de 6 dígitos.');
+                            await renderAdminDashboard();
+                        } else {
+                            pinError.textContent = 'Os PINs não coincidem.';
+                            setTimeout(() => {
+                                setPinState('create', 'Crie seu PIN', 'Digite um PIN de 6 dígitos.');
+                            }, 1000);
+                        }
+                        break;
+                }
+            };
+
+            adminLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                studentView.classList.add('hidden');
+                confirmationView.classList.add('hidden');
+                adminLoginView.classList.remove('hidden');
+                setPinState('check', 'Acesso Administrativo', 'Digite seu PIN de 6 dígitos.');
+            });
+            
+            document.getElementById('cancel-pin').addEventListener('click', () => {
+                adminLoginView.classList.add('hidden'); studentView.classList.remove('hidden'); resetPinInput();
+            });
+
+            pinKeypad.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'BUTTON') return;
+                pinError.textContent = '';
+                if (e.target.id === 'delete-pin') { pinEntry = pinEntry.slice(0, -1); } 
+                else if (pinEntry.length < 6 && !isNaN(e.target.textContent)) { pinEntry += e.target.textContent; }
+                updatePinUI(); handlePinEntry();
+            });
+            
+            document.getElementById('master-password-submit').addEventListener('click', () => {
+                if (document.getElementById('master-password').value === MASTER_PASSWORD) {
+                    setPinState('create', 'Crie seu PIN', 'Digite um PIN de 6 dígitos.');
+                    document.getElementById('master-password').value = '';
+                } else {
+                    showPopup('Senha mestra incorreta!', true);
+                }
+            });
+        }
+        
+        async function initializeAdminPanel() {
+            const addSafeListener = (id, event, handler) => {
+                const el = document.getElementById(id);
+                if (el) el[event] = handler;
+                else console.error(`Element with id "${id}" not found.`);
+            };
+
+            addSafeListener('logout-btn', 'onclick', () => { adminView.classList.add('hidden'); studentView.classList.remove('hidden'); });
+            addSafeListener('backup-btn', 'onclick', handleBackup);
+            addSafeListener('trash-btn', 'onclick', () => { renderTrashView(); trashModal.classList.remove('hidden'); });
+            addSafeListener('close-trash-modal', 'onclick', () => trashModal.classList.add('hidden'));
+            
+            ['search-filter', 'status-filter', 'date-filter-start', 'date-filter-end'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', renderAdminDashboard);
+                }
+            });
+
+            document.getElementById('class-groups-container').addEventListener('click', async e => {
+                const accordionHeader = e.target.closest('.accordion-header');
+                if (accordionHeader) {
+                    const content = accordionHeader.nextElementSibling;
+                    const icon = accordionHeader.querySelector('svg');
+                    icon.classList.toggle('rotate-180');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                }
+                
+                const approveBtn = e.target.closest('.approve-btn');
+                if(approveBtn) {
+                    await updateStudentStatus(approveBtn.dataset.id, 'aprovada');
+                    showPopup('Aluno aprovado!');
+                }
+
+                const rejectBtn = e.target.closest('.reject-btn');
+                 if(rejectBtn) {
+                    await updateStudentStatus(rejectBtn.dataset.id, 'reprovada');
+                    showPopup('Aluno reprovado!');
+                }
+            });
+        }
+        
+        async function renderAdminDashboard() {
+            const students = await dbGetAll('students');
+            
+            renderStatsCards(students);
+
+            const filteredStudents = students.filter(s => {
+                const search = document.getElementById('search-filter')?.value.toLowerCase() || '';
+                const status = document.getElementById('status-filter')?.value || '';
+                const start = document.getElementById('date-filter-start')?.value ? new Date(document.getElementById('date-filter-start').value).setHours(0,0,0,0) : 0;
+                const end = document.getElementById('date-filter-end')?.value ? new Date(document.getElementById('date-filter-end').value).setHours(23,59,59,999) : Infinity;
+
+                const matchSearch = !search || s.fullName?.toLowerCase().includes(search);
+                const matchStatus = !status || s.status === status;
+                const matchDate = new Date(s.createdAt).getTime() >= start && new Date(s.createdAt).getTime() <= end;
+                
+                return matchSearch && matchStatus && matchDate;
+            });
+            
+            const groupsContainer = document.getElementById('class-groups-container');
+            groupsContainer.innerHTML = turmasData.map(turma => {
+                const studentsInTurma = filteredStudents.filter(s => s.turmas.includes(turma.code));
+                if (studentsInTurma.length === 0) return '';
+                
+                return `
+                <div class="card rounded-xl shadow-sm">
+                    <button class="accordion-header w-full flex justify-between items-center p-4 text-left" aria-expanded="false">
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-lg">${turma.code} - ${turma.text}</span>
+                            <span class="px-2 py-1 text-xs font-semibold text-indigo-800 bg-indigo-100 rounded-full">${studentsInTurma.length} aluno(s)</span>
+                        </div>
+                        <svg class="w-5 h-5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-default grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${studentsInTurma.map(student => renderStudentCard(student)).join('')}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        
+        function renderStudentCard(student) {
+            const statusColors = { 
+                enviada: { bg: 'bg-yellow-50', border: 'border-yellow-300', text: 'text-yellow-800', badge: 'bg-yellow-200' },
+                aprovada: { bg: 'bg-green-50', border: 'border-green-300', text: 'text-green-800', badge: 'bg-green-200' },
+                reprovada: { bg: 'bg-red-50', border: 'border-red-300', text: 'text-red-800', badge: 'bg-red-200' },
+            };
+            const color = statusColors[student.status] || { bg: 'bg-slate-50', border: 'border-slate-300', text: 'text-slate-800', badge: 'bg-slate-200' };
+
+            const actionsHtml = student.status === 'enviada' ? `
+                <div class="mt-4 flex gap-2">
+                    <button data-id="${student.id}" class="approve-btn w-full text-sm font-semibold py-1.5 px-3 rounded-lg bg-green-500 text-white hover:bg-green-600">Aprovar</button>
+                    <button data-id="${student.id}" class="reject-btn w-full text-sm font-semibold py-1.5 px-3 rounded-lg bg-red-500 text-white hover:bg-red-600">Reprovar</button>
+                </div>
+            ` : '';
+
+            return `
+            <div id="student-card-${student.id}" class="p-4 rounded-lg border ${color.bg} ${color.border}">
+                <div class="flex items-center gap-4">
+                    <img src="${student.photo || 'https://placehold.co/48x48/EFEFEF/333333?text=S/F'}" class="w-12 h-12 rounded-full object-cover">
+                    <div class="flex-grow">
+                        <p class="font-bold">${student.fullName}</p>
+                        <p class="text-sm text-muted-foreground">${student.plan}</p>
+                    </div>
+                    <span class="text-xs font-bold px-2 py-1 rounded-full ${color.badge} ${color.text}">${student.status}</span>
+                </div>
+                ${actionsHtml}
+            </div>
+            `;
+        }
+
+        async function updateStudentStatus(studentId, newStatus) {
+            await dbTransaction(['students'], 'readwrite', tx => {
+                const store = tx.objectStore('students');
+                const req = store.get(studentId);
+                req.onsuccess = () => {
+                    const student = req.result;
+                    if (student) {
+                        student.status = newStatus;
+                        store.put(student);
+                    }
+                };
+            });
+            await renderAdminDashboard();
+        }
+
+        function renderStatsCards(students) {
+            const today = new Date().toISOString().slice(0, 10);
+            const totalStudents = students.length;
+            const newToday = students.filter(s => s.createdAt.startsWith(today)).length;
+            const pending = students.filter(s => s.status === 'enviada').length;
+            const totalRevenue = students.filter(s => s.status === 'aprovada').reduce((sum, s) => sum + (s.total || 0), 0);
+
+            const cards = [
+                { title: 'Total de Alunos', value: totalStudents, icon: `<svg class="w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`, color: 'blue' },
+                { title: 'Matrículas Hoje', value: newToday, icon: `<svg class="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`, color: 'green' },
+                { title: 'Pendentes', value: pending, icon: `<svg class="w-8 h-8 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`, color: 'yellow' },
+                { title: 'Total Arrecadado', value: formatCurrency(totalRevenue), icon: `<svg class="w-8 h-8 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01" /></svg>`, color: 'indigo' }
+            ];
+
+            document.getElementById('stats-cards').innerHTML = cards.map(card => `
+                <div class="card p-6 rounded-xl shadow-sm flex items-center gap-6">
+                    <div class="p-3 rounded-full bg-${card.color}-100">${card.icon}</div>
+                    <div>
+                        <p class="text-sm text-muted-foreground">${card.title}</p>
+                        <p class="text-2xl font-bold">${card.value}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        async function renderTrashView() {
+            const trashItems = await dbGetAll('trash');
+            const body = document.getElementById('trash-table-body');
+            body.innerHTML = trashItems.length > 0 ? trashItems.map(item => `
+                <tr><td class="px-6 py-4">${item.student.fullName}</td><td class="px-6 py-4">${new Date(item.deletedAt).toLocaleString('pt-BR')}</td>
+                <td class="px-6 py-4"><button data-id="${item.id}" class="restore-btn text-blue-600 hover:underline">Restaurar</button> | <button data-id="${item.id}" class="perm-delete-btn text-red-600 hover:underline">Excluir</button></td></tr>`).join('')
+                : `<tr><td colspan="3" class="text-center p-8 text-muted-foreground">A lixeira está vazia.</td></tr>`;
+            
+            document.getElementById('empty-trash-btn').onclick = async () => { if (trashItems.length > 0 && confirm('Tem certeza? Isso é irreversível.')) { await dbTransaction(['trash'], 'readwrite', (tx) => tx.objectStore('trash').clear()); renderTrashView(); }};
+            body.querySelectorAll('.restore-btn').forEach(btn => btn.onclick = async e => {
+                const id = e.target.dataset.id;
+                await dbTransaction(['students', 'trash'], 'readwrite', tx => {
+                    const trashStore = tx.objectStore('trash');
+                    trashStore.get(id).onsuccess = e2 => {
+                        const item = e2.target.result;
+                        if(item) { tx.objectStore('students').add(item.student); trashStore.delete(id); }
+                    };
+                });
+                renderTrashView();
+            });
+             body.querySelectorAll('.perm-delete-btn').forEach(btn => btn.onclick = async e => {
+                 if(confirm('Excluir permanentemente?')){
+                    const id = e.target.dataset.id;
+                    await dbTransaction(['trash'], 'readwrite', tx => tx.objectStore('trash').delete(id));
+                    renderTrashView();
+                 }
+            });
+        }
+        
+        async function handleBackup() {
+            // ... (código existente)
+        }
+
+        function handleRestore(event) {
+            // ... (código existente)
+        }
+        
+        async function checkTrashAutoPurge() {
+            // ... (código existente)
+        }
+        
+        async function seedDatabaseWithMockData() {
+            let count = 0;
+            await dbTransaction(['students'], 'readonly', (tx, res) => {
+                const req = tx.objectStore('students').count();
+                req.onsuccess = () => res.final = req.result;
+            }).then(result => count = result);
+
+            if (count === 0) {
+                 const mockStudents = [
+                    { id: 'RM-2025-1001', fullName: 'Ana Beatriz Cardoso', age: '17', dob: '2008-05-15', school: 'Colégio Exemplo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98877-6655', instagram: '@anabeatriz', motherName: 'Cláudia Cardoso', turmas: ['R1', 'F1'], plan: 'trimestral', createdAt: '2025-08-25T10:00:00.000Z', status: 'aprovada', total: 350 },
+                    { id: 'RM-2025-1002', fullName: 'Lucas Martins Silva', age: '16', dob: '2009-02-20', school: 'Escola Modelo', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 91122-3344', instagram: '@lucasms', motherName: 'Fernanda Martins', turmas: ['R2', 'M1'], plan: 'mensal', createdAt: '2025-08-31T11:30:00.000Z', status: 'enviada', total: 500 },
+                    { id: 'RM-2025-1003', fullName: 'Mariana Ferreira', age: '18', dob: '2007-09-10', school: 'Centro de Ensino', grade: 'Concluído', situacao: 'parou', whatsapp: '(62) 95566-7788', instagram: '@mari.ferreira', motherName: 'Sofia Ferreira', turmas: ['F1', 'G1'], plan: 'bimestral', createdAt: '2025-08-27T14:00:00.000Z', status: 'aprovada', total: 400 },
+                    { id: 'RM-2025-1004', fullName: 'Pedro Henrique Almeida', age: '17', dob: '2008-11-05', school: 'Colégio Objetivo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98899-0011', instagram: '@pedro.h.a', motherName: 'Juliana Almeida', turmas: ['M2', 'G1'], plan: 'trimestral', createdAt: '2025-08-28T09:15:00.000Z', status: 'enviada', total: 350 },
+                    { id: 'RM-2025-1005', fullName: 'Sofia Oliveira', age: '17', dob: '2008-01-25', school: 'Colégio Visão', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98123-4567', instagram: '@sofia.oliveira', motherName: 'Carla Oliveira', turmas: ['R3', 'M1'], plan: 'bimestral', createdAt: '2025-08-29T15:00:00.000Z', status: 'aprovada', total: 400 },
+                    { id: 'RM-2025-1006', fullName: 'Gabriel Costa', age: '16', dob: '2009-03-30', school: 'Externato São José', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 98234-5678', instagram: '@gabrielcosta', motherName: 'Sandra Costa', turmas: ['F1'], plan: 'mensal', createdAt: '2025-08-30T10:00:00.000Z', status: 'aprovada', total: 250 },
+                    { id: 'RM-2025-1007', fullName: 'Laura Pereira', age: '17', dob: '2008-07-12', school: 'Colégio Exemplo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98345-6789', instagram: '@laurapereira', motherName: 'Cristina Pereira', turmas: ['R4', 'M2'], plan: 'trimestral', createdAt: '2025-08-31T09:00:00.000Z', status: 'enviada', total: 350 },
+                    { id: 'RM-2025-1008', fullName: 'Arthur Rodrigues', age: '18', dob: '2007-04-01', school: 'Escola Modelo', grade: 'Concluído', situacao: 'parou', whatsapp: '(62) 98456-7890', instagram: '@arthur.rodrigues', motherName: 'Beatriz Rodrigues', turmas: ['R1'], plan: 'bimestral', createdAt: '2025-08-26T18:00:00.000Z', status: 'aprovada', total: 200 },
+                    { id: 'RM-2025-1009', fullName: 'Beatriz Almeida', age: '16', dob: '2009-08-19', school: 'Colégio Visão', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 98567-8901', instagram: '@biaalmeida', motherName: 'Patrícia Almeida', turmas: ['R5', 'G1'], plan: 'mensal', createdAt: '2025-08-28T13:20:00.000Z', status: 'aprovada', total: 500 },
+                    { id: 'RM-2025-1010', fullName: 'Davi Santos', age: '17', dob: '2008-06-06', school: 'Colégio Objetivo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98678-9012', instagram: '@davi_santos', motherName: 'Vanessa Santos', turmas: ['M1', 'R3'], plan: 'mensal', createdAt: '2025-08-30T16:45:00.000Z', status: 'enviada', total: 500 },
+                    { id: 'RM-2025-1011', fullName: 'Júlia Souza', age: '18', dob: '2007-02-14', school: 'Centro de Ensino', grade: 'Concluído', situacao: 'parou', whatsapp: '(62) 98789-0123', instagram: '@juliasouza', motherName: 'Márcia Souza', turmas: ['F1', 'R6'], plan: 'bimestral', createdAt: '2025-08-25T19:00:00.000Z', status: 'aprovada', total: 400 },
+                    { id: 'RM-2025-1012', fullName: 'Heitor Lima', age: '16', dob: '2009-10-03', school: 'Externato São José', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 98890-1234', instagram: '@heitorlima', motherName: 'Daniela Lima', turmas: ['M2', 'G1'], plan: 'trimestral', createdAt: '2025-08-29T08:00:00.000Z', status: 'reprovada', total: 350 },
+                    { id: 'RM-2025-1013', fullName: 'Isabella Gonçalves', age: '17', dob: '2008-12-01', school: 'Colégio Exemplo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 98901-2345', instagram: '@isagoncalves', motherName: 'Simone Gonçalves', turmas: ['R1', 'M1'], plan: 'mensal', createdAt: '2025-08-31T14:10:00.000Z', status: 'enviada', total: 500 },
+                    { id: 'RM-2025-1014', fullName: 'Bernardo Ribeiro', age: '17', dob: '2008-09-09', school: 'Colégio Objetivo', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 99012-3456', instagram: '@beribeiro', motherName: 'Aline Ribeiro', turmas: ['R2', 'F1'], plan: 'bimestral', createdAt: '2025-08-27T11:00:00.000Z', status: 'aprovada', total: 400 },
+                    { id: 'RM-2025-1015', fullName: 'Manuela Carvalho', age: '16', dob: '2009-05-22', school: 'Escola Modelo', grade: '2º Ano', situacao: 'frequenta', whatsapp: '(62) 99123-4567', instagram: '@manucarvalho', motherName: 'Tatiane Carvalho', turmas: ['R4'], plan: 'trimestral', createdAt: '2025-08-30T12:00:00.000Z', status: 'aprovada', total: 200 },
+                    { id: 'RM-2025-1016', fullName: 'Theo Fernandes', age: '17', dob: '2008-03-18', school: 'Colégio Visão', grade: '3º Ano', situacao: 'frequenta', whatsapp: '(62) 99234-5678', instagram: '@theof', motherName: 'Renata Fernandes', turmas: ['M2'], plan: 'mensal', createdAt: '2025-08-29T17:30:00.000Z', status: 'enviada', total: 250 }
+                ];
+                try {
+                    await dbTransaction(['students'], 'readwrite', (tx) => {
+                        const store = tx.objectStore('students');
+                        mockStudents.forEach(student => store.add(student));
+                    });
+                } catch (error) { console.error("Erro ao inserir dados de exemplo:", error); }
+            }
+        }
+
+        // --- LÓGICA DE TEMAS ---
+        function createThemeSwitcher(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = `
+                <div class="flex items-center gap-1 p-1 rounded-full card border border-default shadow-sm">
+                    <button class="theme-btn p-1.5 rounded-full" data-theme="light" aria-label="Tema Claro"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg></button>
+                    <button class="theme-btn p-1.5 rounded-full" data-theme="dark" aria-label="Tema Escuro"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg></button>
+                    <button class="theme-btn p-1.5 rounded-full" data-theme="contrast" aria-label="Tema de Alto Contraste"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 16v-2m8-8h-2M4 12H2m18 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                </div>`;
+            
+            const buttons = container.querySelectorAll('.theme-btn');
+            const updateActiveButton = (theme) => {
+                buttons.forEach(btn => {
+                    btn.classList.toggle('bg-primary', btn.dataset.theme === theme);
+                    btn.classList.toggle('text-primary-foreground', btn.dataset.theme === theme);
+                });
+            };
+            
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const theme = button.dataset.theme;
+                    document.documentElement.setAttribute('data-theme', theme);
+                    localStorage.setItem('theme', theme);
+                    updateActiveButton(theme);
+                });
+            });
+
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            updateActiveButton(currentTheme);
+        }
+
+        // --- CHAMADA PRINCIPAL ---
+        async function initializeApp() {
+            try {
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                
+                await initDB();
+                await seedDatabaseWithMockData();
+
+                initializeStudentForm();
+                initializeAdminLogin();
+                initializeAdminPanel();
+                checkTrashAutoPurge();
+
+                createThemeSwitcher('theme-switcher-student');
+                createThemeSwitcher('theme-switcher-admin');
+
+            } catch (error) {
+                console.error("Falha na inicialização:", error);
+                document.body.innerHTML = `<h1>Ocorreu um erro crítico. Tente limpar os dados do site.</h1><p>${error}</p>`;
+            }
+        }
+
+        initializeApp();
+    });
+    </script>
+</body>
+</html>
+
